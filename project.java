@@ -93,7 +93,7 @@ public class project {
         Scanner sc = new Scanner(System.in);
 
         FoodItem[] menu = {
-                new FoodItem("Burgerr", 100),
+                new FoodItem("Burgerr", 150),
                 new FoodItem("Pizza", 300),
                 new FoodItem("Pasta", 250),
                 new FoodItem("Sandwich", 150)
