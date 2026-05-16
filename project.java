@@ -96,7 +96,7 @@ public class project {
                 new FoodItem("Burgerr", 150),
                 new FoodItem("Pizza", 300),
                 new FoodItem("Pasta", 250),
-                new FoodItem("Sandwich", 150)
+                new FoodItem("momos", 150)
         };
 
         Restaurant restaurant = new Restaurant("Food Hub", menu);
