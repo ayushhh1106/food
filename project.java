@@ -110,7 +110,7 @@ public class project {
             choice = sc.nextInt();
 
             if (choice >= 1 && choice <= 4) {
-                System.out.print("Enter quantity: ");
+                System.out.print("Enter valu: ");
                 int qty = sc.nextInt();
                 order.addItem(restaurant.getItem(choice - 1), qty);
             }
