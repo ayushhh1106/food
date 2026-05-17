@@ -94,7 +94,7 @@ public class project {
 
         FoodItem[] menu = {
                 new FoodItem("Burgerr", 150),
-                new FoodItem("Pizza", 300),
+                new FoodItem("puri", 300),
                 new FoodItem("paneer", 250),
                 new FoodItem("momos", 150)
         };
