@@ -1,125 +1,301 @@
-import java.util.Scanner;
+import java.util.*;
 
-class FoodItem {
-    String itemName;
-    double price;
+class InvalidOrderException extends Exception {
+    public InvalidOrderException(String message) {
+        super(message);
+    }
+}
 
-    FoodItem(String itemName, double price) {
-        this.itemName = itemName;
-        this.price = price;
+interface Payment {
+    void makePayment(double amount);
+}
+
+abstract class User {
+    private String name;
+    private String phone;
+
+    public User(String name, String phone) {
+        this.name = name;
+        this.phone = phone;
     }
 
     public String getName() {
-        return itemName;
+        return name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public abstract void displayRole();
+}
+
+class Customer extends User {
+
+    public Customer(String name, String phone) {
+        super(name, phone);
+    }
+
+    @Override
+    public void displayRole() {
+        System.out.println("Role : Customer");
+    }
+}
+
+class Restaurant {
+    private String restaurantName;
+
+    public Restaurant(String restaurantName) {
+        this.restaurantName = restaurantName;
+    }
+
+    public String getRestaurantName() {
+        return restaurantName;
+    }
+}
+
+class FoodItem {
+
+    private int id;
+    private String name;
+    private double price;
+
+    public FoodItem(int id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public double getPrice() {
         return price;
     }
-}
 
-class Restaurant {
-    String name;
-    FoodItem[] menu;
-
-    Restaurant(String name, FoodItem[] menu) {
-        this.name = name;
-        this.menu = menu;
-    }
-
-    public void displayMenu() {
-        System.out.println("\n--- Menu ---");
-        for (int i = 0; i < menu.length; i++) {
-            System.out.println((i + 1) + ". " + menu[i].getName() + " - ₹" + menu[i].getPrice());
-        }
-    }
-
-    public FoodItem getItem(int index) {
-        return menu[index];
+    public void display() {
+        System.out.println(id + ". " + name + " - ₹" + price);
     }
 }
 
 class Order {
-    FoodItem[] items = new FoodItem[10];
-    int[] quantities = new int[10];
-    int count = 0;
 
-    double subtotal = 0;
-    double tax = 0;
-    double deliveryCharge = 0;
-    double total = 0;
+    private final int orderId;
+    private Customer customer;
+    private ArrayList<FoodItem> items;
 
-    public void addItem(FoodItem item, int quantity) {
-        items[count] = item;
-        quantities[count] = quantity;
-        count++;
+    public Order(int orderId, Customer customer) {
+        this.orderId = orderId;
+        this.customer = customer;
+        items = new ArrayList<>();
     }
 
-    public void calculateTotal() {
-        subtotal = 0;
+    public void addItem(FoodItem item) {
+        items.add(item);
+    }
 
-        for (int i = 0; i < count; i++) {
-            subtotal += items[i].getPrice() * quantities[i];
+    public double calculateBill() {
+        double total = 0;
+
+        for (FoodItem item : items) {
+            total += item.getPrice();
         }
 
-        if (subtotal > 500) {
-            deliveryCharge = 0;
-        } else {
-            deliveryCharge = 50;
-        }
+        return total;
+    }
 
-        tax = subtotal * 0.05;
-        total = subtotal + tax + deliveryCharge;
+    public double calculateBill(double discount) {
+        return calculateBill() - discount;
     }
 
     public void displayOrder() {
-        System.out.println("\n===== Order Summary =====");
 
-        for (int i = 0; i < count; i++) {
-            System.out.println(items[i].getName() + " x" + quantities[i] +
-                    " = ₹" + (items[i].getPrice() * quantities[i]));
+        StringBuilder bill = new StringBuilder();
+
+        bill.append("\n======= ORDER SUMMARY =======\n");
+        bill.append("Order ID : ").append(orderId).append("\n");
+        bill.append("Customer : ").append(customer.getName()).append("\n");
+
+        for (FoodItem item : items) {
+            bill.append(item.getName())
+                .append(" - ₹")
+                .append(item.getPrice())
+                .append("\n");
         }
 
-        System.out.println("--------------------------");
-        System.out.println("Subtotal: ₹" + subtotal);
-        System.out.println("Delivery Charge: ₹" + deliveryCharge);
-        System.out.println("Tax (5%): ₹" + tax);
-        System.out.println("Total Amount: ₹" + total);
+        bill.append("Total Bill : ₹")
+            .append(calculateBill());
+
+        System.out.println(bill);
     }
 }
 
-public class project {
+class UpiPayment implements Payment {
+
+    @Override
+    public void makePayment(double amount) {
+        System.out.println("UPI Payment Successful : ₹" + amount);
+    }
+}
+
+class CardPayment implements Payment {
+
+    @Override
+    public void makePayment(double amount) {
+        System.out.println("Card Payment Successful : ₹" + amount);
+    }
+}
+
+class DeliveryPerson extends User {
+
+    public DeliveryPerson(String name, String phone) {
+        super(name, phone);
+    }
+
+    @Override
+    public void displayRole() {
+        System.out.println("Role : Delivery Partner");
+    }
+}
+
+public class FoodDeliverySystem {
+
     public static void main(String[] args) {
+
         Scanner sc = new Scanner(System.in);
 
+        Restaurant restaurant = new Restaurant("Ayush Foods");
+
         FoodItem[] menu = {
-                new FoodItem("Burgerr", 150),
-                new FoodItem("puri", 300),
-                new FoodItem("paneer", 250),
-                new FoodItem("momo", 100)
+                new FoodItem(1, "Burger", 120),
+                new FoodItem(2, "Pizza", 250),
+                new FoodItem(3, "Pasta", 180),
+                new FoodItem(4, "Momos", 90),
+                new FoodItem(5, "Cold Drink", 50)
         };
 
-        Restaurant restaurant = new Restaurant("Food Hub", menu);
-        Order order = new Order();
+        try {
 
-        int choice;
+            System.out.println("===== FOOD DELIVERY SYSTEM =====");
 
-        do {
-            restaurant.displayMenu();
-            System.out.println("Select item (1-4) or 0 to finish:");
-            choice = sc.nextInt();
+            System.out.print("Enter Customer Name: ");
+            String name = sc.nextLine();
 
-            if (choice >= 1 && choice <= 4) {
-                System.out.print("Enter valu: ");
-                int qty = sc.nextInt();
-                order.addItem(restaurant.getItem(choice - 1), qty);
+            System.out.print("Enter Phone Number: ");
+            String phone = sc.nextLine();
+
+            Customer customer = new Customer(name, phone);
+
+            customer.displayRole();
+
+            Order order = new Order(1001, customer);
+
+            int choice;
+
+            do {
+
+                System.out.println(
+                        "\n--- MENU (" +
+                        restaurant.getRestaurantName()
+                        + ") ---");
+
+                for (FoodItem item : menu) {
+                    item.display();
+                }
+
+                System.out.println("0. Finish Order");
+
+                System.out.print("Choose Item: ");
+                choice = sc.nextInt();
+
+                if (choice >= 1 && choice <= menu.length) {
+
+                    order.addItem(menu[choice - 1]);
+
+                    System.out.println(
+                            menu[choice - 1].getName()
+                                    + " Added.");
+                }
+
+            } while (choice != 0);
+
+            if (order.calculateBill() == 0) {
+                throw new InvalidOrderException(
+                        "No food item selected!"
+                );
             }
 
-        } while (choice != 0);
+            order.displayOrder();
 
-        order.calculateTotal();
-        order.displayOrder();
+            System.out.println("\nSelect Payment Method");
+            System.out.println("1. UPI");
+            System.out.println("2. Card");
 
-        sc.close();
+            int payChoice = sc.nextInt();
+
+            Payment payment;
+
+            switch (payChoice) {
+
+                case 1:
+                    payment = new UpiPayment();
+                    break;
+
+                case 2:
+                    payment = new CardPayment();
+                    break;
+
+                default:
+                    throw new InvalidOrderException(
+                            "Invalid Payment Method"
+                    );
+            }
+
+            payment.makePayment(order.calculateBill());
+
+            DeliveryPerson rider =
+                    new DeliveryPerson(
+                            "Rahul Rider",
+                            "9876543210"
+                    );
+
+            rider.displayRole();
+
+            System.out.println(
+                    "Order Assigned to : "
+                            + rider.getName()
+            );
+
+            System.out.println(
+                    "\nOrder Delivered Successfully!"
+            );
+
+        } catch (InvalidOrderException e) {
+
+            System.out.println(
+                    "Order Error : "
+                            + e.getMessage()
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Unexpected Error : "
+                            + e.getMessage()
+            );
+
+        } finally {
+
+            System.out.println(
+                    "\nThank You For Using Food Delivery System"
+            );
+
+            sc.close();
+        }
     }
 }
